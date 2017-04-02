@@ -17,7 +17,6 @@ import android.widget.Button;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -220,39 +219,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             EditText e = (EditText) findViewById(R.id.editText);
             String s = e.getText().toString();
-            byte[] input = s.getBytes();
-
-
             mSessionService.startSession(s);
-
-            int numSegs = input.length/100;
-            int i = 0;
-            long millisPlayTime = -1;
-            do {
-                byte[] testBytes;
-                if (input.length < i*100 + 100) {
-                    testBytes = Arrays.copyOfRange(input, i*100, input.length);
-                }
-                else {
-                    testBytes = Arrays.copyOfRange(input, i*100, i*100+100);
-                }
-                long tPlay = playByteSized(testBytes, playStatus, delay);
-                if (tPlay > -1)
-                    // start listening when playing is finished
-                    mTimer.schedule(new StatusUpdateTimerTask(SessionStatus.LISTENING), tPlay);
-
-                setTimeout(correctBroadcast, true);
-
-                if (tPlay == -1) {
-                    millisPlayTime = -1;
-                }
-                else {
-                    millisPlayTime += tPlay;
-                }
-                i++;
-            } while (i < numSegs);
-
-            return millisPlayTime;
         }
     };
 
