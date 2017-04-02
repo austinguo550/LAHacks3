@@ -12,6 +12,7 @@ package com.example.austinguo550.lahacks3;
  */
 
 		import java.io.ByteArrayOutputStream;
+		import java.util.Arrays;
 		import java.util.Timer;
 		import java.util.TimerTask;
 		import java.lang.Math.*;
@@ -22,12 +23,13 @@ package com.example.austinguo550.lahacks3;
 		import android.os.Handler;
 		import android.os.IBinder;
 		import android.os.Message;
+		import android.widget.ProgressBar;
 
 public class SessionService extends Service {
 	private final IBinder mBinder = new SessionBinder();
 
 	private MicrophoneListener microphoneListener = null;
-	private StreamDecoder sDecoder = null;
+	//private StreamDecoder sDecoder = null;
 	private ByteArrayOutputStream decodedStream = new ByteArrayOutputStream();
 
 	private SessionStatus mStatus;
@@ -38,7 +40,7 @@ public class SessionService extends Service {
 	private int sessionTimeout = -1;
 	private int timeoutCounter = -1;
 
-	private String correctBroadcast = "";
+	private byte[] correctBroadcast;
 	private boolean haveCorrectBroadcast = false;
 	private boolean amInitiator = false;
 
@@ -69,7 +71,7 @@ public class SessionService extends Service {
 			switch (msg.what) {
 				case (MSG_RECEIVED_GOOD_BROADCAST):
 					if (!haveCorrectBroadcast) {
-						correctBroadcast = new String(sDecoder.getReceivedBytes());
+//						correctBroadcast = new String(sDecoder.getReceivedBytes());
 						setTimeout(correctBroadcast, false);
 					}
 					haveCorrectBroadcast = true;
@@ -90,7 +92,7 @@ public class SessionService extends Service {
 						resetTimeout(true);
 
 						long tWait = (long) (Constants.kSetupJitter * Constants.kSamplesPerDuration / Constants.kSamplingFrequency * 1000);
-						long tHelp = playData(correctBroadcast, SessionStatus.HELPING, tWait) + tWait;
+						long tHelp = playData(correctBroadcast.getBytes(), SessionStatus.HELPING, tWait) + tWait;
 
 						if (tHelp > -1)
 							// start listening when playing is finished
@@ -178,7 +180,7 @@ public class SessionService extends Service {
 		mStatus = SessionStatus.NONE;
 	}
 
-	public long playData(String input, SessionStatus playStatus, long delay) {
+	public long playData(byte[] input, SessionStatus playStatus, long delay) {
 		stopListening();
 
 		long millisPlayTime = -1;
@@ -187,7 +189,7 @@ public class SessionService extends Service {
 
 			// try to play the file
 			System.out.println("Performing " + input);
-			byte[] inputBytes = input.getBytes();
+			byte[] inputBytes = input;//.getBytes();
 			AudioUtils.performArray(inputBytes, delay);
 
 			/**
@@ -205,6 +207,8 @@ public class SessionService extends Service {
 
 		return millisPlayTime;
 	}
+
+
 
 	public long playSOS(long delay) {
 		stopListening();
@@ -233,7 +237,7 @@ public class SessionService extends Service {
 	}
 
 	/* Start a collaborative sharing session */
-	public void startSession(String input) {
+	public void startSession(byte[] input) {
 		stopListening();
 
 		// we are the session initiator, so we start with the "correct" broadcast
@@ -250,11 +254,11 @@ public class SessionService extends Service {
 
 		long tPlay = playData(correctBroadcast, SessionStatus.PLAYING, 0);
 
-		if (tPlay > -1)
-			// start listening when playing is finished
-			mTimer.schedule(new StatusUpdateTimerTask(SessionStatus.LISTENING), tPlay);
-
-		setTimeout(correctBroadcast, true);
+//		if (tPlay > -1)
+//			// start listening when playing is finished
+//			mTimer.schedule(new StatusUpdateTimerTask(SessionStatus.LISTENING), tPlay);
+//
+//		setTimeout(correctBroadcast, true);
 	}
 
 	public void sessionFinished() {
@@ -272,13 +276,14 @@ public class SessionService extends Service {
 
 		mTimer = new Timer();
 
-		correctBroadcast = "";
+//		correctBroadcast = "";
+		correctBroadcast = new byte[]{};
 		haveCorrectBroadcast = false;
 		amInitiator = false;
 	}
 
-	private void setTimeout(String input, boolean afterPlay) {
-		int secondsPlay = (int) ( (Constants.kPlayJitter + Constants.kDurationsPerHail + Constants.kBytesPerDuration * input.length() + Constants.kDurationsPerCRC)
+	private void setTimeout(byte[] input, boolean afterPlay) {
+		int secondsPlay = (int) ( (Constants.kPlayJitter + Constants.kDurationsPerHail + Constants.kBytesPerDuration * input.length + Constants.kDurationsPerCRC)
 				* Constants.kSamplesPerDuration / Constants.kSamplingFrequency );
 		// set timeout to be 3x time to play the broadcast
 		sessionTimeout = (int) Math.log((double)secondsPlay) + 2;
