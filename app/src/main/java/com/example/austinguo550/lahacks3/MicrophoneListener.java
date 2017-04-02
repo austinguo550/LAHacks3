@@ -11,6 +11,7 @@ package com.example.austinguo550.lahacks3;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
 
 /**
  * This thread puts bytes from the microphone into the StreamDecoder's buffer.
@@ -58,15 +59,17 @@ public class MicrophoneListener implements Runnable {
     	   */
     		
     		    		
-    	    int buffSize = (int) Encoder.kSamplingFrequency 
+    	    int buffSize = (int) Encoder.kSamplingFrequency
     	    						* 2 // 2 seconds in the buffer
     	    						* 2; // recording in 16 bit
-    	    
+			Log.w("WARNING", String.valueOf(AudioRecord.getMinBufferSize((int) Encoder.kSamplingFrequency, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)));
+			Log.w("WARNING", String.valueOf(buffSize));
+
     	    int biteSize = ((int) Encoder.kSamplingFrequency ) / 8;  // move 1/8 sec of data at a time
     	    
     	    AudioRecord arec = new AudioRecord(MediaRecorder.AudioSource.MIC,
     	    		(int) Encoder.kSamplingFrequency, //11025,
-    	            AudioFormat.CHANNEL_CONFIGURATION_MONO,
+    	            AudioFormat.CHANNEL_IN_MONO,
     	            AudioFormat.ENCODING_PCM_16BIT, // must match PlayThread. Tried (and failed) to make ENCODING_PCM_8BIT work on Android
     	            buffSize);
     	    System.out.println(Thread.currentThread().getName() + " is recording");

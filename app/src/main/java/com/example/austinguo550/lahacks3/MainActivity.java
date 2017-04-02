@@ -1,10 +1,15 @@
 package com.example.austinguo550.lahacks3;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,6 +44,21 @@ import static com.example.austinguo550.lahacks3.SessionService.SessionStatus.PLA
 public class MainActivity extends AppCompatActivity {
     /** Called when the activity is first created. */
     // Loopback l = null;
+
+
+    private boolean permissionToRecordAccepted = false;
+    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch(requestCode) {
+            case 200://REQUEST_RECORD_AUDIO_PERMISSION:
+                permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                break;
+        }
+        if (!permissionToRecordAccepted) finish();
+    }
 
     private SessionService mSessionService;
     private boolean mIsBound;
@@ -92,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
     String mCreateDataType = null;
     String mCreateDataExtraText = null;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,12 +123,16 @@ public class MainActivity extends AppCompatActivity {
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
-            @Override
+            //@Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
+
+
+        //ActivityCompat.requestPermissions(this,permissions,200);
+
 
         textStatus = (TextView) findViewById(R.id.TextStatus);
         textListen = (TextView) findViewById(R.id.TextListen);
@@ -320,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateResults() {
         if (mSessionService.getStatus() == SessionService.SessionStatus.LISTENING) {
             textStatus.setText(mSessionService.getBacklogStatus());
+            Log.d("DEBUG", textStatus.toString());
             textListen.setText(mSessionService.getListenString());
 
             Button b = (Button) findViewById(R.id.button7);

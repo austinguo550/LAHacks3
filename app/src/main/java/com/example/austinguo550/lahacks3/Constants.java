@@ -23,11 +23,11 @@ public interface Constants {
   public static final double kAmplitude = 0.125d; /* (1/8) */
 
   // Sampling frequency (number of sample values per second)
-  public static final double kSamplingFrequency = 22050; //rps - reduced to 11025 from 22050 
+  public static final double kSamplingFrequency = 48000; //rps - reduced to 11025 from 22050
   		// to enable the decoder to keep up with the audio on Motorola CLIQ  
 
   // Sound duration of encoded byte (in seconds)
-  public static final double kDuration = 0.2; // rps - increased from 0.1 to improve reliability on Android 
+  public static final double kDuration = 0.035; // rps - increased from 0.1 to improve reliability on Android
 
   // Number of samples per duration
   public static final int kSamplesPerDuration = (int)(kSamplingFrequency * kDuration);
